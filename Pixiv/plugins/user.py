@@ -8,61 +8,6 @@ from telethon.events import CallbackQuery
 from . import *
 
 
-@pixiv.on(events.InlineQuery(pattern="(\d+)?user(s)?(?:\s|$)([\s\S]*)"))
-async def iuser(event):
-    user_ = event.query.user_id
-    query = "".join(event.text.split(maxsplit=1)[1:])
-    offset = event.pattern_match.group(1)
-    s = event.pattern_match.group(2)
-    if offset:
-        offset = int(offset)
-    else: offset = 0
-    c = offset%30
-    offset = offset-c
-    if c==0 and offset!=0: c = 30
-    elif offset==0: c=1
-    c = c-1
-    if not query:
-        return
-    if s: sett = offset
-    else: sett = 0 
-    if query.isdigit(): users = None
-    else: users = await pxv.search_user(query, offset=sett)
-    if users:
-        if list(users.keys())[0] == "error":
-            await pxv.login(refresh_token=Vars.TOKEN)
-            users = await pxv.search_user(query, offset=sett)
-    if s:
-        try:
-            img, caption, buttons = await usersResult(users, f"s_{query}:{offset}", user_, offset=offset, uc=c)
-        except:
-            results = await queryResults(event, query, user_)
-            return await event.answer([event.builder.article(title=results, text=results, buttons=[Button.switch_inline("Search again", query="users ", same_peer=True)])])
-        try:
-            await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
-        except:
-            try:
-                await event.answer([event.builder.photo(ogiMas(img), text=caption, buttons=buttons)])
-            except:
-                await event.answer([event.builder.photo("Pixiv/plugins/un.jpg", text=caption, buttons=buttons)])
-    else:
-        try:
-            uid = users['user_previews'][0]['user']['id'] if users else query
-        except IndexError:
-            return await event.answer([event.builder.article(title="0 results found of given query", text="0 results found of given query", buttons=[Button.switch_inline("Search again", query="user ", same_peer=True)])])
-        try:
-            img, caption, buttons = await queryResults(event, str(uid), user_, user=True, offset=offset, uc=c)
-        except:
-            results = await queryResults(event, query, user_)
-            return await event.answer([event.builder.article(title=results, text=results, buttons=[Button.switch_inline("Search again", query="user ", same_peer=True)])])
-        try:
-            await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
-        except:
-            try:
-                await event.answer([event.builder.photo(ogiMas(img), text=caption, buttons=buttons)])
-            except:
-                await event.answer([event.builder.photo("Pixiv/plugins/un.jpg", text=caption, buttons=buttons)])
-
 
 @pixiv.on(events.NewMessage(incoming=True, pattern="/(\d+)?user(s)?(?:\s|$)([\s\S]*)"))
 async def user(event):
