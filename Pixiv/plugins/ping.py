@@ -7,6 +7,25 @@ from telethon.events import CallbackQuery
 
 sudos = list(map(int, (Vars.SUDO_IDS).split(" ")))
 
+text = f"""__[Pixiv](https://www.pixiv.net/en/) is a Japanese online community for artists. Using illustranium you can get illustrations from pixiv.net
+Just directly send me your search query or send direct link to post
+Also you can get all illustrations of the user by- 
+/user <userid \ username>
+
+Or can even search for multiple users
+/users <search user>
+
+Example:
+/user 49552835
+/user wlop
+/users snake
+
+To search illustration in groups use /pixiv command - 
+/pixiv nezuko
+
+Note - Dont think the search results are limited to 30 you can go further till the end of result
+
+For any concern, appreciation or suggestion contact__ @Zarox"""
     
 @pixiv.on(events.NewMessage(incoming=True, pattern=f"^/start({Vars.BOT_USERNAME})$"))
 async def start(event):
@@ -23,22 +42,7 @@ async def help(event):
     
     user = event.sender.id
     if event.is_group: await event.reply(
-        f"""__Send pixiv illust link or use cmds 
-
-/pixiv <artid \ search query>
-/user <userid \ username>
-/users <search user>
-
-Example:
-
-/pixiv 102944326
-/pixiv nature
-
-/user 49552835
-/user wlop
-/users snake
-
-For any concern, appreciation or suggestion contact__ @Zarox""",
+text,
         buttons=[Button.inline("Inline", data=f"inline_{user}")]
     )
 
@@ -48,22 +52,7 @@ For any concern, appreciation or suggestion contact__ @Zarox""",
 async def help(event):
     user = event.sender.id
     if event.is_private: await event.reply(
-        f"""__Send pixiv illust link or use cmds 
-
-/pixiv <artid \ search query>
-/user <userid \ username>
-/users <search user>
-
-Example:
-
-/pixiv 102944326
-/pixiv nature
-
-/user 49552835
-/user wlop
-/users snake
-
-For any concern, appreciation or suggestion contact__ @Zarox""",
+        text,
         buttons=[Button.inline("Inline", data=f"inline_{user}")]
     )
         
@@ -103,22 +92,24 @@ async def inline(event):
     user_ = int(event.sender_id)
     user = int(event.pattern_match.group(1).decode("UTF-8"))
     if user != user_: return
-    text = """__Send pixiv illust link or use cmds 
- 
- @PixivArtbot pixiv <artid \ search query>
- @PixivArtbot user <userid \ username>
- @PixivArtbot users <search user>
- 
- Example:
- 
- @PixivArtbot pixiv 102944326
- @PixivArtbot pixiv nature
- 
- @PixivArtbot user 49552835
- @PixivArtbot user wlop
- @PixivArtbot users snake
- 
- For any concern, appreciation or suggestion contact__ @Zarox"""
+    text = f"""[Pixiv](https://www.pixiv.net/en/) is a Japanese online community for artists. Using illustranium you can get illustrations from pixiv.net
+Just directly type your search query or use direct link to post - 
+@PixivartBot nezuko
+
+Also you can get all illustrations of the user by- 
+@PixivartBot user <userid \ username>
+
+Or can even search for multiple users - 
+@PixivartBot users <search user>
+
+Example:
+@PixivartBotuser 49552835
+@PixivartBotuser wlop
+@PixivartBotusers snake
+
+Note - Dont think the search results are limited to 30 you can go further till the end of result
+
+For any concern, appreciation or suggestion contact__ @Zarox"""
     await event.edit(text,
     buttons=[Button.inline("Commands", data=f"cg_{user}")]
     )
@@ -129,22 +120,7 @@ async def cg(event):
     user = int(event.pattern_match.group(1).decode("UTF-8"))
     if user != user_: return
     eve = await event.get_message()
-    text = """__Send pixiv illust link or use cmds 
-
-/pixiv <artid \ search query>
-/user <userid \ username>
-/users <search user>
-
-Example:
-
-/pixiv 102944326
-/pixiv nature
-
-/user 49552835
-/user wlop
-/users snake
-
-For any concern, appreciation or suggestion contact__ @Zarox"""
+    
     await event.edit(text,
     buttons=[Button.inline("Inline", data=f"inline_{user}")]
     )
