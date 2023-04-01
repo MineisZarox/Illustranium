@@ -73,9 +73,11 @@ async def link(event):
         if event.text.startswith("/pixiv") and event.is_group:
             offset = (event.text.split(" ", 1)[0]).split("pixiv")[1]
             query = event.text.split(" ", 1)[1]
-        else:
+        elif event.is_group:
             offset = 0
             query = event.text
+        else: 
+            return
         if query.startswith("/"): return
         if offset != "": offset = int(offset)
         else: offset = 0
