@@ -30,7 +30,7 @@ async def iqueryi(event):
         except:
             return
         img, caption, buttons = await queryResults(event, int(artId), user_, user=True)
-    elif event.text != "users" or event.text != "user":
+    elif not event.text.startswith("users") or not event.text.startswith("user"):
         query = event.text
         if not query: return
         try:
