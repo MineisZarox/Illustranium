@@ -94,7 +94,7 @@ async def inline(event):
     user_ = int(event.sender_id)
     user = int(event.pattern_match.group(1).decode("UTF-8"))
     if user != user_: return
-    text = f"""[Pixiv](https://www.pixiv.net/en/) is a Japanese online community for artists. Using illustranium you can get illustrations from pixiv.net
+    text = f"""__[Pixiv](https://www.pixiv.net/en/) is a Japanese online community for artists. Using illustranium you can get illustrations from pixiv.net
 Just directly type your search query or use direct link to post - 
 @PixivartBot nezuko
 
@@ -112,8 +112,10 @@ Example:
 Note - Dont think the search results are limited to 30 you can go further till the end of result
 
 For any concern, appreciation or suggestion contact__ @Zarox"""
-    await event.edit(text,
-    buttons=[Button.inline("Commands", data=f"cg_{user}")]
+    await event.edit(
+        text,
+        buttons=[Button.inline("Commands", data=f"cg_{user}")],
+        link_preview=False
     )
     
 @pixiv.on(CallbackQuery(pattern="cg_(\d+)"))
@@ -123,8 +125,10 @@ async def cg(event):
     if user != user_: return
     eve = await event.get_message()
     
-    await event.edit(text,
-    buttons=[Button.inline("Inline", data=f"inline_{user}")]
+    await event.edit(
+        text,
+        buttons=[Button.inline("Inline", data=f"inline_{user}")],
+        link_preview=False
     )
     
 @pixiv.on(events.NewMessage(incoming=True))
