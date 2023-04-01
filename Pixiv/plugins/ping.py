@@ -32,7 +32,7 @@ async def start(event):
     user = await pixiv.get_entity(int(event.sender.id))
     if event.is_group: await event.reply(
         f"Hi {user.first_name} 👋[\u200d](https://telegra.ph/file/2a10282c49d4c10847971.jpg)\nGet illustration from pixiv.net using Illustranium\n\nSend /help to check out cmds and how to use illustranium",
-        buttons=[[Button.url("Dev", "https://t.me/zarox")], [Button.url("Update", "https://t.me/update")]],
+        buttons=[[Button.url("Dev", "https://t.me/zarox")], [Button.url("Update", "https://t.me/zaroxverse")]],
         link_preview=True
     )
 
@@ -83,7 +83,7 @@ async def start(event):
         await pixiv.send_message(int(Vars.OWNER_ID), startm)
         await event.reply(
         f"Hi {user.first_name} 👋[\u200d](https://telegra.ph/file/2a10282c49d4c10847971.jpg)\nGet illustration from pixiv.net using Illustranium\n\nSend /help to check out cmds and how to use illustranium",
-        buttons=[[Button.url("Dev", "https://t.me/zarox")], [Button.url("Update", "https://t.me/update")]],
+        buttons=[[Button.url("Dev", "https://t.me/zarox")], [Button.url("Update", "https://t.me/zaroxverse")]],
         link_preview=True)
 
 
