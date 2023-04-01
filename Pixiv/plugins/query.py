@@ -73,7 +73,7 @@ async def link(event):
         if event.text.startswith("/pixiv") and event.is_group:
             offset = (event.text.split(" ", 1)[0]).split("pixiv")[1]
             query = event.text.split(" ", 1)[1]
-        elif event.is_group:
+        elif event.is_private:
             offset = 0
             query = event.text
         else: 
@@ -111,7 +111,6 @@ async def link(event):
 
 @pixiv.on(CallbackQuery(pattern="nq_(\d+)_(\d+)_(.*)"))
 async def nextq(event):
-    print("yessss")
     user_ = int(event.sender_id)
     c = int(event.pattern_match.group(1).decode("UTF-8"))
     user = int(event.pattern_match.group(2).decode("UTF-8"))
@@ -178,7 +177,6 @@ async def nextq(event):
         
 @pixiv.on(CallbackQuery(pattern="bq_(-?(\d+))_(\d+)_(.*)"))
 async def backq(event):
-    print("han back ")
     user_ = int(event.sender_id)
     c = int(event.pattern_match.group(1).decode("UTF-8"))
     user = int(event.pattern_match.group(3).decode("UTF-8"))
@@ -193,9 +191,7 @@ async def backq(event):
     if c == -1 and nc != 0:
         pc = nc - 30
     cc += nc
-    print("out", c, cc, pc, nc)
     if pc in offlist and cc == nc and nc != 0:
-        print("In", c, cc, pc, nc)
         if query.isdigit():
             img, caption, buttons = await queryResults(event, query, user_, user=True, offset=pc, uc=29)
             # try:
@@ -256,7 +252,6 @@ async def qi(event):
     user = int(event.pattern_match.group(2).decode("UTF-8"))
     artId = int(event.pattern_match.group(3).decode("UTF-8"))
     query = event.pattern_match.group(4).decode("UTF-8")
-    print(user, user_)
     if user != user_: return await event.answer("Send your own query")
     
     url = f"https://www.pixiv.net/en/artworks/{artId}"
