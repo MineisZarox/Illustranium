@@ -54,7 +54,7 @@ async def iuser(event):
             img, caption, buttons = await queryResults(event, str(uid), user_, user=True, offset=offset, uc=c)
         except:
             results = await queryResults(event, query, user_)
-            return await event.answer([event.builder.article(results, text=resylts, buttons=[Button.switch_inline(f"Search again", query=users, same_peer=True)])])
+            return await event.answer(results)
         try:
             await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
         except:
