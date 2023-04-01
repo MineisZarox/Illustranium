@@ -37,7 +37,7 @@ async def iuser(event):
             img, caption, buttons = await usersResult(users, f"s_{query}:{offset}", user_, offset=offset, uc=c)
         except:
             results = await queryResults(event, query, user_)
-            return await event.answer(results)
+            return await event.answer([event.builder.article(title=results)])
         try:
             await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
         except:
@@ -49,12 +49,12 @@ async def iuser(event):
         try:
             uid = users['user_previews'][0]['user']['id'] if users else query
         except IndexError:
-            return await event.answer("`0 results found of given query`")
+            return await event.answer([event.builder.article(title="0 results found of given query")])
         try:
             img, caption, buttons = await queryResults(event, str(uid), user_, user=True, offset=offset, uc=c)
         except:
             results = await queryResults(event, query, user_)
-            return await event.answer(results)
+            return await event.answer([event.builder.article(title=results)])
         try:
             await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
         except:
