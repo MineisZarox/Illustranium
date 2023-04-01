@@ -142,7 +142,6 @@ async def nextu(event):
         c = 0
         cc = nc+1
     
-    print(c, cc, pc, nc)
     if pc in offlist and cc == pc+1:
         result = await pxv.search_user(query.split(":", 1)[0].split("_", 1)[1], offset=pc)
         try:
@@ -199,7 +198,6 @@ async def backu(event):
     cc += nc
     if c == -1:
         pc = nc - 30
-    print(c, cc, pc, nc)
     if pc in offlist and cc == nc and nc != 0:
         result = await pxv.search_user(query.split(":", 1)[0].split("_", 1)[1], offset=pc)
         try:
@@ -250,7 +248,6 @@ async def uq(event):
     uid = int(event.pattern_match.group(2).decode("UTF-8"))
     
     user_ = int(event.sender_id)
-    print(user, user_)
     if user != user_: return await event.answer("Send your own query")
     try:
         img, caption, buttons = await queryResults(event, str(uid), user_, user=True, offset=0)
