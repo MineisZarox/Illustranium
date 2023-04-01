@@ -42,7 +42,7 @@ async def iqueryi(event):
             results = await queryResults(event, query, user_)
             return await event.answer([event.builder.article(title=results, text=results, buttons=[Button.switch_inline("Search again", query="", same_peer=True)])])
 
-    if "limit_" in img: return await event.answer([event.builder.article(title="FORBIDDEN")])
+    if "limit_" in img: return await event.answer([event.builder.article(title="FORBIDDEN", text="FORBIDDEN", buttons=[Button.switch_inline("Search again", query="", same_peer=True)])])
     try:
         await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
     except:
