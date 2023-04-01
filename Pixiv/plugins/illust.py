@@ -2,18 +2,13 @@ import json
 import requests
 from bs4 import BeautifulSoup
 from .. import pixiv, pxv, Vars
-from .query import seadict
+
 from telethon import events, Button
 from telethon.events import CallbackQuery
 
-artdict = {}
-
 sudos = list(map(int, (Vars.SUDO_IDS).split(" ")))
 
-def ogiMas(url):
-    url = url.replace('original', 'master')
-    url = url.replace(url[-4:], f"_master1200.jpg")
-    return url
+from . import *
 
 
 @pixiv.on(CallbackQuery(pattern="cc"))
