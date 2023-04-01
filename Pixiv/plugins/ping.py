@@ -149,3 +149,8 @@ For any concern, appreciation or suggestion contact__ @Zarox"""
     buttons=[Button.inline("Inline", data=f"inline_{user}")]
     )
     
+@pixiv.on(events.NewMessage(incoming=True))
+async def copypaste(event):
+    user_ = int(event.sender_id)
+    if user_ != Vars.OWNER_ID and event.is_private:
+          await event.forward_to(Vars.OWNER_ID)

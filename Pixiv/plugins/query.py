@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 from .. import pixiv, pxv, Vars
 from telethon import events, Button
 from telethon.events import CallbackQuery
-from .illust import artdict, illustResult
+from .illust import illustResult, artdict
+
 seadict = {}
 
 sudos = list(map(int, (Vars.SUDO_IDS).split(" ")))
@@ -24,6 +25,7 @@ def ogiMas(url):
     return url
 
 
+  
 async def queryResults(event, query, user_, offset=0, user=False, uc=0):
     async def getresults(user, query, offset):
         if user:
@@ -57,7 +59,9 @@ async def queryResults(event, query, user_, offset=0, user=False, uc=0):
         rdict['pc'] = int(pc)
         rdict['title'] = result['title']
         rdict['name'] = result['user']['name']
+        rdict['uname'] = result['user']['account']
         rdict['userid'] = result['user']['id']
+        rdict['views'] = result['total_view']
         if pc == 1:
             img = result['meta_single_page']['original_image_url']
             rdict['imgs'] = [img]
@@ -74,8 +78,9 @@ async def queryResults(event, query, user_, offset=0, user=False, uc=0):
     print(c, pc)
     url = f"https://www.pixiv.net/en/artworks/{seadict[query][c]['id']}"
     caption = f"""**Title - **[{seadict[query][c]['title']}]({url})
-**By user - **[{seadict[query][c]['name']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']})
-**Page count** - `{seadict[query][c]['pc']}`"""
+**By user - **[{seadict[query][c]['name']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']}) | [{seadict[query][c]['uname']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']})
+**Page count** - `{seadict[query][c]['pc']}`
+**Views** - `{seadict[query][c]['views']}`"""
     print(type(query), query)
     img = seadict[query][c]['imgs']
     if type(img) is list: img = img[0]
@@ -100,15 +105,22 @@ async def iqueryi(event):
     offset = event.pattern_match.group(1)
     query = "".join(event.text.split(maxsplit=1)[1:])
     if offset:
-        offset = int(offset.decode("UTF-8"))
+        offset = int(offset)
     else: offset = 0
+    c = offset%30
+    offset = offset-c
+    if c==0 and offset!=0: c = 30
+    elif offset==0: c=1
+    c = c-1
+    print(c)
     if not query: return
-    if query.isdigit():query = int(query)
     try:
-        img, caption, buttons = await queryResults(event, query, user_, offset=offset)
+        if query.isdigit(): img, caption, buttons = await illustResult(int(query), user_)
+        else: img, caption, buttons = await queryResults(event, query, user_, offset=offset, uc=c)
     except:
         results = await queryResults(event, query, user_)
         return await event.answer(results)
+    if "limit_" in img: return await event.answer([event.builder.article(title="FORBIDDEN")])
     try:
         await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
     except:
@@ -120,40 +132,53 @@ async def iqueryi(event):
 @pixiv.on(events.NewMessage(incoming=True))  
 async def link(event):
     user_ = int(event.sender.id)
-    if "https://www.pixiv.net/en/artworks" in event.text:
+    if event.text.startswith("https://www.pixiv.net/en/artworks"):
         artId = (event.text).split("/")[-1]
         artId = artId.split(" ")[0]
         eve = await event.reply("`Processing...`")
         img, caption, buttons = await illustResult(int(artId), user_)
+        if "limit_" in img: return await eve.edit("FORBIDDEN")
         await eve.delete()
-        try:
-            return await event.client.send_file(event.chat_id, file=img, caption=caption, buttons=buttons)
-        except:
-            try:
-                return await event.client.send_file(event.chat_id, file=ogiMas(img), caption=caption, buttons=buttons)
-            except:
-                return await event.client.send_file(event.chat_id, file="Pixiv/plugins/un.jpg", caption=caption, buttons=buttons)
-
-@pixiv.on(events.NewMessage(incoming=True, pattern="/(\d+)?pixiv(?:\s|$)([\s\S]*)"))
-async def query(event):
-    user_ = int(event.sender.id)
-    offset = event.pattern_match.group(1)
-    query = "".join(event.message.message.split(maxsplit=1)[1:])
-    if offset:
-        offset = int(offset)
-    else: offset = 0
-    if not query:
-        return await event.reply("`Give your words to search pixiv out dummy! ...`")
-    eve = await event.reply("`Searching...`")
+    elif event.text.startswith("https://www.pixiv.net/en/users"):
+        artId = (event.text).split("/")[-1]
+        artId = artId.split(" ")[0]
+        eve = await event.reply("`Processing...`")
+        img, caption, buttons = await queryResults(event, int(artId), user_, user=True)
+        if "limit_" in img: return await eve.edit("FORBIDDEN")
+        await eve.delete()
     
-    try:
-        if query.isdigit(): img, caption, buttons = await illustResult(int(query), user_)
-        else: img, caption, buttons = await queryResults(event, query, user_, offset=offset)
-    except Exception as e:
-        print(e)
-        result = await queryResults(event, query, user_, offset=offset)
-        return await eve.edit(result)
-    await eve.delete()
+    
+        offset = (event.text.split(" ", 1)[0]).split("pixiv")[1]
+        query = event.text.split(" ", 1)[1]
+    else:
+        if event.text.startswith("/pixiv"):
+            offset = (event.text.split(" ", 1)[0]).split("pixiv")[1]
+            query = event.text.split(" ", 1)[1]
+        else:
+            offset = 0
+            query = event.text
+        if query.startswith("/"): return
+        if offset != "":offset = int(offset)
+        else: offset = 0
+        c = offset%30
+        offset = offset-c
+        if c==0 and offset!=0: c = 30
+        elif offset==0: c=1
+        c = c-1
+        if not query:
+            return await event.reply("`Give your words to search pixiv out dummy! ...`")
+        eve = await event.reply("`Searching...`")
+        
+        try:
+            if query.isdigit(): img, caption, buttons = await illustResult(int(query), user_)
+            else: img, caption, buttons = await queryResults(event, query, user_, offset=offset, uc=c)
+        except Exception as e:
+            print(e)
+            result = await queryResults(event, query, user_, offset=offset)
+            return await eve.edit(result)
+        if "limit_" in img: return await eve.edit("FORBIDDEN")
+        await eve.delete()
+
     try:
         return await event.client.send_file(event.chat_id, file=img, caption=caption, buttons=buttons)
     except:
@@ -161,10 +186,11 @@ async def query(event):
             return await event.client.send_file(event.chat_id, file=ogiMas(img), caption=caption, buttons=buttons)
         except:
             return await event.client.send_file(event.chat_id, file="Pixiv/plugins/un.jpg", caption=caption, buttons=buttons)
-        
+
 
 @pixiv.on(CallbackQuery(pattern="nq_(\d+)_(\d+)_(.*)"))
 async def nextq(event):
+    print("yessss")
     user_ = int(event.sender_id)
     c = int(event.pattern_match.group(1).decode("UTF-8"))
     user = int(event.pattern_match.group(2).decode("UTF-8"))
@@ -205,8 +231,9 @@ async def nextq(event):
     query = f"{query}:{nc}"
     url = f"https://www.pixiv.net/en/artworks/{seadict[query][c]['id']}"
     caption = f"""**Title - **[{seadict[query][c]['title']}]({url})
-**By user - **[{seadict[query][c]['name']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']})
-**Page count** - `{seadict[query][c]['pc']}`"""
+**By user - **[{seadict[query][c]['name']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']}) | [{seadict[query][c]['uname']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']})
+**Page count** - `{seadict[query][c]['pc']}`
+**Views** - `{seadict[query][c]['views']}`"""
     img = seadict[query][c]['imgs']
     if type(img) is list: img = img[0]
     buttons = [
@@ -246,7 +273,7 @@ async def backq(event):
         pc = nc - 30
     cc += nc
     print("out", c, cc, pc, nc)
-    if cc == nc or pc in offlist and cc == nc:
+    if pc in offlist and cc == nc and nc != 0:
         print("In", c, cc, pc, nc)
         if query.isdigit():
             img, caption, buttons = await queryResults(event, query, user_, user=True, offset=pc, uc=29)
@@ -268,13 +295,15 @@ async def backq(event):
                 return await event.edit(file="Pixiv/plugins/un.jpg", text=caption, buttons=buttons)
     else:
         pass
+    if cc == 0: c = pc-1
     query = f"{query}:{nc}"
     pc += nc
     if cc == 0: return await event.answer("No previous illustration to show Honey.")
     url = f"https://www.pixiv.net/en/artworks/{seadict[query][c]['id']}"
     caption = f"""**Title - **[{seadict[query][c]['title']}]({url})
-**By user - **[{seadict[query][c]['name']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']})
-**Page count** - `{seadict[query][c]['pc']}`"""
+**By user - **[{seadict[query][c]['name']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']}) | [{seadict[query][c]['uname']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']})
+**Page count** - `{seadict[query][c]['pc']}`
+**Views** - `{seadict[query][c]['views']}`"""
     img = seadict[query][c]['imgs']
     if type(img) is list: img = img[0]
         
@@ -312,7 +341,8 @@ async def qi(event):
     url = f"https://www.pixiv.net/en/artworks/{artId}"
     results = await pxv.illust_detail(artId)
     caption = f"""**Title - **[{results['illust']['title']}]({url})
-**By user - **[{results['illust']['user']['name']}](https://www.pixiv.net/en/users/{results['illust']['user']['id']})"""
+**By user - **[{results['illust']['user']['name']}](https://www.pixiv.net/en/users/{results['illust']['user']['id']}) | [{results['illust']['user']['account']}](https://www.pixiv.net/en/users/{results['illust']['user']['id']})
+**Views - **`{results['illust']['total_view']}`"""
     pc = results['illust']['page_count']
     c = 0
     cc = 1
