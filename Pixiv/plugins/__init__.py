@@ -68,7 +68,6 @@ async def queryResults(event, query, user_, offset=0, user=False, uc=0):
                 results = await pxv.user_illusts(int(query))
                 query = f"{query}:{offset}"
             else:
-                print('han lol')
                 results = await pxv.user_illusts(int(query), offset=offset)
                 query = f"{query}:{offset}"
         else:
@@ -110,13 +109,13 @@ async def queryResults(event, query, user_, offset=0, user=False, uc=0):
     c = uc
     pc = offset
     pc += len(results['illusts'])
-    print(c, pc)
+    
     url = f"https://www.pixiv.net/en/artworks/{seadict[query][c]['id']}"
     caption = f"""**Title - **[{seadict[query][c]['title']}]({url})
 **By user - **[{seadict[query][c]['name']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']}) | [{seadict[query][c]['uname']}](https://www.pixiv.net/en/users/{seadict[query][c]['userid']})
 **Page count** - `{seadict[query][c]['pc']}`
 **Views** - `{seadict[query][c]['views']}`"""
-    print(type(query), query)
+    
     img = seadict[query][c]['imgs']
     if type(img) is list: img = img[0]
     buttons = [
