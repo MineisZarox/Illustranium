@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from .. import pixiv, pxv, Vars
 from telethon import events, Button
 from telethon.events import CallbackQuery
-from .illust import illustResult, artdict
+from .illust import artdict
 
 seadict = {}
 
@@ -24,7 +24,40 @@ def ogiMas(url):
     url = url.replace(url[-4:], f"_master1200.jpg")
     return url
 
-
+async def illustResult(artId, user):
+    url = f"https://www.pixiv.net/en/artworks/{artId}"
+    results = await pxv.illust_detail(artId)
+    if list(results.keys())[0] == "error":
+        await pxv.login(refresh_token=Vars.TOKEN)
+        results = await pxv.illust_detail(artId)
+    caption = f"""**Title - **[{results['illust']['title']}]({url})
+**By user - **[{results['illust']['user']['name']}](https://www.pixiv.net/en/users/{results['illust']['user']['id']}) | [{results['illust']['user']['account']}](https://www.pixiv.net/en/users/{results['illust']['user']['id']})
+**Views - **`{results['illust']['total_view']}`"""
+    pc = results['illust']['page_count']
+    c = 0
+    cc = 1
+    img = ""
+    if pc == 1:
+        img = results['illust']['meta_single_page']['original_image_url']
+        artdict[artId] = [img]
+    else:
+        img = results['illust']['meta_pages'][c]['image_urls']['original']
+        imgs = []
+        for i in range(pc):
+            imgs.append(results['illust']['meta_pages'][i]['image_urls']['original'])
+        artdict[artId] = imgs
+    
+    buttons = [
+        [
+            Button.inline("Prev", data=f"b_{0}_{pc}_{user}_{artId}"),
+            Button.inline(f"{cc}/{pc}", data="cc"),
+            Button.inline("Next", data=f"n_{cc+1}_{pc}_{user}_{artId}")
+        ],
+        [
+            Button.inline("Download", data=f"d_{c}_{pc}_{user}_{artId}")
+        ]
+    ]
+    return [img, caption, buttons]
   
 async def queryResults(event, query, user_, offset=0, user=False, uc=0):
     async def getresults(user, query, offset):
@@ -99,27 +132,34 @@ async def queryResults(event, query, user_, offset=0, user=False, uc=0):
     
     
 
-@pixiv.on(events.InlineQuery(pattern="(\d+)?pixiv(?:\s|$)([\s\S]*)"))
+@pixiv.on(events.InlineQuery(pattern="pixiv(\d+)?(?:\s|$)([\s\S]*)"))
 async def iqueryi(event):
     user_ = event.query.user_id
-    offset = event.pattern_match.group(1)
-    query = "".join(event.text.split(maxsplit=1)[1:])
-    if offset:
-        offset = int(offset)
-    else: offset = 0
-    c = offset%30
-    offset = offset-c
-    if c==0 and offset!=0: c = 30
-    elif offset==0: c=1
-    c = c-1
-    print(c)
-    if not query: return
-    try:
-        if query.isdigit(): img, caption, buttons = await illustResult(int(query), user_)
-        else: img, caption, buttons = await queryResults(event, query, user_, offset=offset, uc=c)
-    except:
-        results = await queryResults(event, query, user_)
-        return await event.answer(results)
+    if event.text.startswith("https://www.pixiv.net/en/artworks"):
+        artId = (event.text).split("/")[-1]
+        artId = artId.split(" ")[0]
+        try: 
+            artId = int(artId)
+        except:
+            return
+        img, caption, buttons = await illustResult(int(artId), user_)
+    elif event.text.startswith("https://www.pixiv.net/en/users"):
+        artId = (event.text).split("/")[-1]
+        artId = artId.split(" ")[0]
+        try: 
+            artId = int(artId)
+        except:
+            return
+        img, caption, buttons = await queryResults(event, int(artId), user_, user=True)
+    else:
+        query = event.text
+        if not query: return
+        try:
+            if query.isdigit(): img, caption, buttons = await illustResult(int(query), user_)
+            else: img, caption, buttons = await queryResults(event, query, user_,)
+        except:
+            results = await queryResults(event, query, user_)
+            return await event.answer(results)
     if "limit_" in img: return await event.answer([event.builder.article(title="FORBIDDEN")])
     try:
         await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
@@ -151,14 +191,14 @@ async def link(event):
         offset = (event.text.split(" ", 1)[0]).split("pixiv")[1]
         query = event.text.split(" ", 1)[1]
     else:
-        if event.text.startswith("/pixiv"):
+        if event.text.startswith("/pixiv") and event.is_group:
             offset = (event.text.split(" ", 1)[0]).split("pixiv")[1]
             query = event.text.split(" ", 1)[1]
         else:
             offset = 0
             query = event.text
         if query.startswith("/"): return
-        if offset != "":offset = int(offset)
+        if offset != "": offset = int(offset)
         else: offset = 0
         c = offset%30
         offset = offset-c
