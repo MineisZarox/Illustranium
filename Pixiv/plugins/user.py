@@ -6,8 +6,6 @@ from telethon import events, Button
 from telethon.events import CallbackQuery
 
 from . import *
-from . import seadict as userdict
-
 
 
 @pixiv.on(events.InlineQuery(pattern="(\d+)?user(s)?(?:\s|$)([\s\S]*)"))
@@ -56,7 +54,7 @@ async def iuser(event):
             img, caption, buttons = await queryResults(event, str(uid), user_, user=True, offset=offset, uc=c)
         except:
             results = await queryResults(event, query, user_)
-            return await event.answer(results)
+            return await event.answer([event.builder.article(results, text=resylts, buttons=[Button.switch_inline(f"Search again", query=users, same_peer=True)])])
         try:
             await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
         except:
@@ -96,7 +94,7 @@ async def user(event):
             img, caption, buttons = await usersResult(users, f"s_{query}:{offset}", user_, offset=offset, uc=c)
         except:
             results = await queryResults(event, query, user_)
-            return await event.answer(results)
+            return await eve.edit(results)
         try:
             await event.client.send_file(event.chat_id, file=img, caption=caption, buttons=buttons)
         except:
