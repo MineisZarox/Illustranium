@@ -10,47 +10,6 @@ from . import *
 
 sudos = list(map(int, (Vars.SUDO_IDS).split(" ")))
 
-
-@pixiv.on(events.InlineQuery)
-async def iqueryi(event):
-    user_ = event.query.user_id
-    if event.text.startswith("https://www.pixiv.net/en/artworks"):
-        artId = (event.text).split("/")[-1]
-        artId = artId.split(" ")[0]
-        try: 
-            artId = int(artId)
-        except:
-            return
-        img, caption, buttons = await illustResult(int(artId), user_)
-    elif event.text.startswith("https://www.pixiv.net/en/users"):
-        artId = (event.text).split("/")[-1]
-        artId = artId.split(" ")[0]
-        try: 
-            artId = int(artId)
-        except:
-            return
-        img, caption, buttons = await queryResults(event, int(artId), user_, user=True)
-    elif event.text.startswith("users") or event.text.startswith("user"):
-        return 
-    else:
-        query = event.text
-        if not query: return
-        try:
-            if query.isdigit(): img, caption, buttons = await illustResult(int(query), user_)
-            else: img, caption, buttons = await queryResults(event, query, user_,)
-        except:
-            results = await queryResults(event, query, user_)
-            return await event.answer([event.builder.article(title=results, text=results, buttons=[Button.switch_inline("Search again", query="", same_peer=True)])])
-
-    if "limit_" in img: return await event.answer([event.builder.article(title="FORBIDDEN", text="FORBIDDEN", buttons=[Button.switch_inline("Search again", query="", same_peer=True)])])
-    try:
-        await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
-    except:
-        try:
-            await event.answer([event.builder.photo(ogiMas(img), text=caption, buttons=buttons)])
-        except:
-            await event.answer([event.builder.photo("Pixiv/plugins/un.jpg", text=caption, buttons=buttons)])
-
 @pixiv.on(events.NewMessage(incoming=True))  
 async def link(event):
     user_ = int(event.sender.id)
