@@ -6,8 +6,6 @@ from .. import pixiv, pxv, Vars
 from telethon import events, Button
 from telethon.events import CallbackQuery
 
-sudos = list(map(int, (Vars.SUDO_IDS).split(" ")))
-
 from . import *
 
 
