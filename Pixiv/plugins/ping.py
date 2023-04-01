@@ -42,8 +42,9 @@ async def help(event):
     
     user = event.sender.id
     if event.is_group: await event.reply(
-text,
-        buttons=[Button.inline("Inline", data=f"inline_{user}")]
+        text,
+        buttons=[Button.inline("Inline", data=f"inline_{user}")],
+        link_preview=False
     )
 
 
@@ -53,7 +54,8 @@ async def help(event):
     user = event.sender.id
     if event.is_private: await event.reply(
         text,
-        buttons=[Button.inline("Inline", data=f"inline_{user}")]
+        buttons=[Button.inline("Inline", data=f"inline_{user}")],
+        link_preview=False
     )
         
 
