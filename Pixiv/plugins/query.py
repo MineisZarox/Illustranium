@@ -11,7 +11,7 @@ from . import *
 sudos = list(map(int, (Vars.SUDO_IDS).split(" ")))
 
 
-@pixiv.on(events.InlineQuery(pattern="pixiv(\d+)?(?:\s|$)([\s\S]*)"))
+@pixiv.on(events.InlineQuery(pattern="(?:\s|$)([\s\S]*)"))
 async def iqueryi(event):
     user_ = event.query.user_id
     if event.text.startswith("https://www.pixiv.net/en/artworks"):
@@ -30,7 +30,7 @@ async def iqueryi(event):
         except:
             return
         img, caption, buttons = await queryResults(event, int(artId), user_, user=True)
-    else:
+    elif event.text != "users" or event.text != "user":
         query = event.text
         if not query: return
         try:
@@ -38,7 +38,7 @@ async def iqueryi(event):
             else: img, caption, buttons = await queryResults(event, query, user_,)
         except:
             results = await queryResults(event, query, user_)
-            return await event.answer(results)
+            return await event.answer([event.builder.article(title=results)])
     if "limit_" in img: return await event.answer([event.builder.article(title="FORBIDDEN")])
     try:
         await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
