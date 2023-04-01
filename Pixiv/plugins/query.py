@@ -30,7 +30,9 @@ async def iqueryi(event):
         except:
             return
         img, caption, buttons = await queryResults(event, int(artId), user_, user=True)
-    elif not event.text.startswith("users") or not event.text.startswith("user"):
+    elif event.text.startswith("users") or event.text.startswith("user"):
+        return 
+   else:
         query = event.text
         if not query: return
         try:
@@ -39,8 +41,7 @@ async def iqueryi(event):
         except:
             results = await queryResults(event, query, user_)
             return await event.answer([event.builder.article(title=results, text=results, buttons=[Button.switch_inline("Search again", query="", same_peer=True)])])
-    else:
-        return
+
     if "limit_" in img: return await event.answer([event.builder.article(title="FORBIDDEN")])
     try:
         await event.answer([event.builder.photo(img, text=caption, buttons=buttons)])
