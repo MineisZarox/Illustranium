@@ -11,7 +11,7 @@ from . import *
 sudos = list(map(int, (Vars.SUDO_IDS).split(" ")))
 
 
-@pixiv.on(events.InlineQuery(pattern="(?:\s|$)([\s\S]*)"))
+@pixiv.on(events.InlineQuery)
 async def iqueryi(event):
     user_ = event.query.user_id
     if event.text.startswith("https://www.pixiv.net/en/artworks"):
